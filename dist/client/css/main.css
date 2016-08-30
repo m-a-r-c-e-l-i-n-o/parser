@@ -1,0 +1,33 @@
+#generate-report-component > div.submit-button-container {
+    text-align: center;
+}
+#generate-report-component > textarea.report {
+    min-height: 240px;
+}
+
+#display-content-component {
+    padding: 20px;
+    background: #eee;
+}
+
+#display-json-component .json-markup {
+    line-height: 17px;
+    font-size: 13px;
+    font-family: monospace;
+    white-space: pre;
+}
+#display-json-component .json-markup-key {
+    font-weight: bold;
+}
+#display-json-component .json-markup-bool {
+    color: firebrick;
+}
+#display-json-component .json-markup-string {
+    color: green;
+}
+#display-json-component .json-markup-null {
+    color: gray;
+}
+#display-json-component .json-markup-number {
+    color: blue;
+}

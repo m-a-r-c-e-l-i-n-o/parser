@@ -1,0 +1,129 @@
+Quick Start:
+1. Git clone and run "npm install && npm run env" on the directory
+2. Open browser to localhost:8080 when you see "Server started on localhost port
+8080!" in the terminal.
+* Screenshots are located in the "screenshots" folder, just in case there are
+some discrepancies between what I see and what you see. I simply didn't have
+time to test in different browsers or setup saucelabs/browserstack tests.
+
+Assumptions ->
+1. That the "Credit Reporting Resource Guide" is this one:
+http://www.findforms.com/pdf_files/ded/35327/174-6.pdf
+There was no attachment as stated in the email :-)
+2. That there is one physical record with single header and base segment record
+and that it's all one continuous string with fixed blocks as defined by the
+length in the "Character Format" spec.
+3. That it's a good idea to use the language and references in the "Credit
+Reporting Resource Guide".
+4. Field numbers in the field definitions are irrelevant to the implementation.
+5. That all references of "Character Format" in the system assumes fixed
+blocks as opposed to variable blocks.
+
+Highlevel Thought Process:
+1. Read and understand the specs
+2. Figure out the separation of concerns
+3. Look for patterns to reduce the amount of code that needs to be written and
+ensure future considerations to some reasonable capacity.
+
+Backend Strategy:
+1. Build a parser, validator, and an entry point to handle the interaction.
+    - This was apparent based on the description contained in the email.
+2. Find or build a sample of the data to be processed.
+    - I couldn't find one, so I built it. As I did this, I realized that aside
+    from the "Reporting Standards" rules, which where fairly basic, I would need
+    to manage many other rules specific to certain fields. This prompted me to
+    think I would likely need a rules engine of some sort.
+3. Define a reasonable strategy to parse the data.
+    - Since the assumption is that this is one whole file with a defined size
+    and we have information about the position of the fields and their length, I
+    thought about using an ordered spec object that would guide the extraction
+    of each field's value, one by one, from the string with plain ol' iteration,
+    and simply store each value and its corresponding ID in an object, in a
+    key-value fashion. The denoted "value" is another object that contains
+    properties about the field, which would be useful for validation purposes.
+4. Define a reasonable strategy to validate the data.
+    - I did some research into how to build a simple, yet scalable rules engine,
+    and found a variation to the "Strategy Pattern" to be a good start. The idea
+    is that each field will be validated for field types and dependency/one-off
+    rules. Field validations in the spec are defined solely as alphanumeric vs.
+    numeric and their alignment within the field, I thought about augmenting
+    that with a concept of "super types", which simply means I would define
+    additional field types to help enhance validation of the common formats
+    (i.e. date). As for the field dependency validations, I thought of having
+    specialized rule methods that would simply take in the field and fields
+    object, do what whatever it needs to do to validate and return a boolean
+    response to allow for the report generator to throw errors or move forward
+    accordingly. I did not implement this, however, I heavily commented a
+    potential implementation and you can get pretty good idea of what it would
+    be like by looking at the files inside "src/node/validator". The
+    "src/node/validator/index.js" file would be the starting point for that.
+5. Do some extra stuff that made sense.
+    - This is mostly ideas for further future proofing and separating concerns.
+    One example of those would be the files inside "src/language", which
+    basically hold all human readable text (i.e. errors, statuses). The idea
+    is that you don't want to be looking through the code to modify these and
+    also helps reduce duplication as these messages might be used in multiple
+    places.
+
+
+Frontend Strategy:
+1. Displays raw report
+2. Generates report (upon pressing a button)
+3. Sends data to server
+4. Activates loading indicator
+5. Deactivates loading indicator
+6. Receives server response
+7. Checks for errors
+    - If none if found, displays json object
+    - Otherwise, displays error
+
+This led me to the conclusion that I would need the following actions:
+1. Fetch Report
+    - Takes care of initiating the loading state
+2. Fetch Report Done
+    - Takes care of ending the loading state
+3. Generate Report
+    - To handle the instrumentation of the "fetch report" and "fetch report
+    done" actions.
+4. Display Report
+    - Takes initiating the displaying errors, status, and the queryable object
+
+And the following reducers:
+1. Pending
+    - Takes care of updating the state to let components know that data is
+    being fetched.
+1. Report
+    - Takes care of updating the state with the errors, status, and the
+    report object.
+
+Next steps:
+1. Frontend ->
+    - Validation
+        -- There is no validation on the frontend aside from checking if the
+        field is empty.
+    - Network throttle
+        -- There is nothing keeping an user from submitting a thousand "generate
+        report requests". This could be improved by disabling the button, and
+        implementing a throttle strategy (i.e. debouncing the generate report
+        action or canceling the network requests, or both).
+    - More insightful error/status messages
+
+2. Backend ->
+    - Enhancements to queryable object (i.e. parsing the date strings)
+        -- A good strategy might be to use the defined "super types" in the
+        specs. For example, a super type of "DATE" assigned to the "Date of Last
+        Payment" field could be used to transform the data with getters so that
+        the object returns a more relevant value (i.e. a native date object
+        instead of a string).
+    - Deal with records that might contain more than one "Header Record" or
+    "Base Segments Record".
+    - More insightful error/status messages
+
+Final Notes:
+    - I only tested the parser and did so using my own open source test runner
+    called "N.U.T.R.A" (https://github.com/m-a-r-c-e-l-i-n-o/nutra).
+    - Running the environment should run the tests and create an html coverage
+    report, please see the "test/coverage" folder for that.
+    - I did not do any production optimizations (i.e. no scripts minification).
+    - Thank you for taking a look at this.
+    - Let me know when we can set up a time to review it!

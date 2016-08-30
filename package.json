@@ -1,0 +1,49 @@
+{
+  "name": "parser",
+  "version": "0.0.0",
+  "description": "Purposely ambiguous, for now.",
+  "main": "index.js",
+  "scripts": {
+    "test": "nutra --config ./nutra.config.js",
+    "build": "babel src/node --out-dir dist/node && babel src/language --out-dir dist/language",
+    "prepublish": "npm run build",
+    "next-update": "next-update -k true --tldr",
+    "bundle": "browserify -t [ babelify --presets [ react ] ] --debug ./src/client/js/index.js -o ./dist/client/js/app.js",
+    "env": "npm run test && npm run build && npm run bundle && node ./dist/node/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-a-r-c-e-l-i-n-o/parser.git"
+  },
+  "keywords": [
+    "parser"
+  ],
+  "author": "m-a-r-c-e-l-i-n-o <me@marceli.no>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/m-a-r-c-e-l-i-n-o/parser/issues"
+  },
+  "homepage": "https://github.com/m-a-r-c-e-l-i-n-o/parser#readme",
+  "devDependencies": {
+    "babel-cli": "6.11.4",
+    "babel-preset-es2016-node5": "^1.1.2",
+    "babel-preset-react": "^6.11.1",
+    "babelify": "^7.3.0",
+    "browserify": "^13.1.0",
+    "next-update": "^1.2.2",
+    "nutra": "0.0.12",
+    "nutra-jasmine-coverage-babel-preset": "0.0.4"
+  },
+  "dependencies": {
+    "json-markup": "^1.0.0",
+    "koa": "^2.0.0",
+    "koa-send": "^3.2.0",
+    "react": "^15.3.1",
+    "react-dom": "^15.3.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2",
+    "redux-thunk": "^2.1.0",
+    "source-map-support": "^0.4.2",
+    "whatwg-fetch": "^1.0.0"
+  }
+}
